@@ -338,6 +338,36 @@
             box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.1);
         }
 
+        .pin-var-alias {
+            font-weight: bold;
+            color: #17a2b8;
+            font-family: 'Courier New', monospace;
+            width: 120px;
+            min-width: 120px;
+            max-width: 120px;
+            font-size: 0.85em;
+            padding: 6px 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            cursor: text;
+            transition: all 0.2s ease;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pin-var-alias:hover {
+            background: #f0f0f0;
+            border-color: #ddd;
+        }
+
+        .pin-var-alias:focus {
+            outline: none;
+            background: white;
+            border-color: #17a2b8;
+            box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.1);
+        }
+
         .pin-group option {
             padding: 8px;
         }
@@ -859,6 +889,7 @@
                         <span class="sort-header" style="width: 70px; min-width: 70px; text-align: center;" onclick="sortPins('header')">Header</span>
                         <span class="sort-header" style="width: 70px; min-width: 70px; text-align: center;" onclick="sortPins('physical')">Physical</span>
                         <span class="sort-header" style="width: 120px; min-width: 120px;" onclick="sortPins('group')">Group</span>
+                        <span class="sort-header" style="width: 120px; min-width: 120px;" onclick="sortPins('varalias')">Var Alias</span>
                         <span class="sort-header" style="width: 140px; min-width: 140px;" onclick="sortPins('name')">Pin Name</span>
                         <span style="flex: 1;">Capabilities</span>
                     </div>
@@ -1059,6 +1090,24 @@
             
             row.appendChild(groupField);
             
+            // Var Alias field (editable text for programming variable names)
+            const varAliasField = document.createElement('div');
+            varAliasField.className = 'pin-var-alias';
+            varAliasField.contentEditable = true;
+            varAliasField.textContent = `gpio${pinNum}`;
+            varAliasField.dataset.pin = pinNum;
+            varAliasField.title = 'Variable alias for programming (e.g., led_red, btn_start, sensor_temp)';
+            
+            varAliasField.addEventListener('blur', updatePreview);
+            varAliasField.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+            
+            row.appendChild(varAliasField);
+            
             // Pin name/label (editable)
             const label = document.createElement('div');
             label.className = 'pin-label';
@@ -1197,6 +1246,7 @@
                         header_id: null,
                         physical_pin: null,
                         group: null,
+                        var_alias: null,
                         name: null,
                         capabilities: []
                     };
@@ -1221,12 +1271,17 @@
                 const groupEl = label.parentElement.querySelector('.pin-group');
                 const group = groupEl ? groupEl.textContent.trim() : 'Uncategorized';
                 
+                // Get corresponding var_alias
+                const varAliasEl = label.parentElement.querySelector('.pin-var-alias');
+                const varAlias = varAliasEl ? varAliasEl.textContent.trim() : null;
+                
                 if (!pinMap[pin]) {
                     pinMap[pin] = {
                         pin: pin,
                         header_id: header,
                         physical_pin: physicalPin,
                         group: group,
+                        var_alias: varAlias,
                         name: name,
                         capabilities: []
                     };
@@ -1235,6 +1290,7 @@
                     pinMap[pin].header_id = header;
                     pinMap[pin].physical_pin = physicalPin;
                     pinMap[pin].group = group;
+                    pinMap[pin].var_alias = varAlias;
                 }
             });
 
@@ -1245,6 +1301,7 @@
                     header_id: pinData.header_id,
                     physical_pin: pinData.physical_pin,
                     group: pinData.group,
+                    var_alias: pinData.var_alias,
                     name: pinData.name,
                     capabilities: pinData.capabilities
                 });
@@ -1527,6 +1584,14 @@ Research "${platformName}" thoroughly and provide the complete, accurate JSON no
                                 }
                             }
                             
+                            // Set var_alias if provided
+                            if (pinCap.var_alias) {
+                                const varAliasEl = document.querySelector(`.pin-var-alias[data-pin="${pinCap.pin}"]`);
+                                if (varAliasEl) {
+                                    varAliasEl.textContent = pinCap.var_alias;
+                                }
+                            }
+                            
                             // Set pin name if provided
                             if (pinCap.name) {
                                 const labelEl = document.querySelector(`.pin-label[data-pin="${pinCap.pin}"]`);
@@ -1687,6 +1752,9 @@ Research "${platformName}" thoroughly and provide the complete, accurate JSON no
                 } else if (column === 'group') {
                     aVal = a.querySelector('.pin-group').textContent.trim();
                     bVal = b.querySelector('.pin-group').textContent.trim();
+                } else if (column === 'varalias') {
+                    aVal = a.querySelector('.pin-var-alias').textContent.trim();
+                    bVal = b.querySelector('.pin-var-alias').textContent.trim();
                 } else {
                     // Default to sorting by pin number
                     aVal = parseInt(a.querySelector('.pin-label').dataset.pin);
@@ -1718,7 +1786,7 @@ Research "${platformName}" thoroughly and provide the complete, accurate JSON no
         }
 
         function showSortOptions() {
-            const opts = prompt('Sort by:\n1 = Header ID\n2 = Physical Pin\n3 = Group\n4 = Pin Name\n\nEnter numbers separated by commas (e.g., "1,2" for Header then Physical)');
+            const opts = prompt('Sort by:\n1 = Header ID\n2 = Physical Pin\n3 = Group\n4 = Var Alias\n5 = Pin Name\n\nEnter numbers separated by commas (e.g., "1,2" for Header then Physical)');
             if (!opts) return;
             
             const columns = opts.split(',').map(n => {
@@ -1726,7 +1794,8 @@ Research "${platformName}" thoroughly and provide the complete, accurate JSON no
                 if (col === 1) return 'header';
                 if (col === 2) return 'physical';
                 if (col === 3) return 'group';
-                if (col === 4) return 'name';
+                if (col === 4) return 'varalias';
+                if (col === 5) return 'name';
                 return null;
             }).filter(c => c);
             
@@ -1754,6 +1823,9 @@ Research "${platformName}" thoroughly and provide the complete, accurate JSON no
                     } else if (column === 'group') {
                         aVal = a.querySelector('.pin-group').textContent.trim();
                         bVal = b.querySelector('.pin-group').textContent.trim();
+                    } else if (column === 'varalias') {
+                        aVal = a.querySelector('.pin-var-alias').textContent.trim();
+                        bVal = b.querySelector('.pin-var-alias').textContent.trim();
                     } else {
                         // Default to sorting by pin number
                         aVal = parseInt(a.querySelector('.pin-label').dataset.pin);
