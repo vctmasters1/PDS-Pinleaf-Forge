@@ -1,0 +1,228 @@
+{
+  "id": "xiao-esp32c3",
+  "name": "Seeed Studio XIAO ESP32C3",
+  "website": "https://www.seeedstudio.com/seeed-xiao-esp32c3-p-5431.html",
+  "sku": "102010448",
+  "description": "IoT mini development board based on Espressif ESP32-C3 WiFi/Bluetooth dual-mode chip. Suitable for low-power IoT applications and wireless wearable applications.",
+  "architecture": "RISC-V",
+  "cores": 1,
+  "frequency_mhz": 160,
+  "ram_kb": 400,
+  "flash_kb": 4096,
+  "gpio_total": 11,
+  "adc_channels": 4,
+  "pwm_channels": 11,
+  "wifi": "802.11b/g/n",
+  "ble": "5.0",
+  "supported_interfaces": [
+    "I2C",
+    "SPI",
+    "UART"
+  ],
+  "usb_ports": {
+    "usb2": 1
+  },
+  "system_features": [
+    "i2c",
+    "spi",
+    "uart"
+  ],
+  "toolchain": "Arduino IDE",
+  "notes": "Ultra-small form factor: 21 x 17.8 mm. Deep sleep current ~43 μA. Supports lithium battery charging via ETA4054S2F. External RF antenna via U.FL connector. Strapping pins: GPIO2, GPIO8, GPIO9. ADC2 on A3/GPIO5 is unreliable. No built-in RTC, Ethernet, SD card, or sensors. JTAG available via bonding pads. Compatible with Grove shields.",
+  "pin_capabilities": [
+    {
+      "pin": 0,
+      "header_id": "Main",
+      "physical_pin": "14",
+      "group": "Power",
+      "var_alias": "VIN",
+      "name": "VBUS",
+      "capabilities": [
+        "5V"
+      ]
+    },
+    {
+      "pin": 1,
+      "header_id": "Main",
+      "physical_pin": "1",
+      "group": "Power",
+      "var_alias": "GND",
+      "name": "GND",
+      "capabilities": [
+        "GND"
+      ]
+    },
+    {
+      "pin": 2,
+      "header_id": "Main",
+      "physical_pin": "2",
+      "group": "Power",
+      "var_alias": "VCC_3V3",
+      "name": "3V3_OUT",
+      "capabilities": [
+        "3V3"
+      ]
+    },
+    {
+      "pin": 3,
+      "header_id": "Main",
+      "physical_pin": "3",
+      "group": "Analog",
+      "var_alias": "aD0",
+      "name": "GPIO2 / ADC1_CH2",
+      "capabilities": [
+        "GPIO",
+        "ADC",
+        "PWM",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 4,
+      "header_id": "Main",
+      "physical_pin": "4",
+      "group": "Analog",
+      "var_alias": "aD1",
+      "name": "GPIO3 / ADC1_CH3",
+      "capabilities": [
+        "GPIO",
+        "ADC",
+        "PWM",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 5,
+      "header_id": "Main",
+      "physical_pin": "5",
+      "group": "Analog",
+      "var_alias": "aD2",
+      "name": "GPIO4 / ADC1_CH4 / MTMS",
+      "capabilities": [
+        "GPIO",
+        "ADC",
+        "PWM",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 6,
+      "header_id": "Main",
+      "physical_pin": "6",
+      "group": "Analog",
+      "var_alias": "aD3",
+      "name": "GPIO5 / ADC2_CH0 / MTDI",
+      "capabilities": [
+        "GPIO",
+        "ADC",
+        "PWM",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 7,
+      "header_id": "Main",
+      "physical_pin": "7",
+      "group": "Communication",
+      "var_alias": "iSda",
+      "name": "GPIO6 / I2C_SDA / MTCK",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "I2C",
+        "SDA",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 8,
+      "header_id": "Main",
+      "physical_pin": "13",
+      "group": "Communication",
+      "var_alias": "iScl",
+      "name": "GPIO7 / I2C_SCL / MTDO",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "I2C",
+        "SCL",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 9,
+      "header_id": "Main",
+      "physical_pin": "12",
+      "group": "Communication",
+      "var_alias": "uTx",
+      "name": "GPIO21 / UART0_TX",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "UART",
+        "TXD",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 10,
+      "header_id": "Main",
+      "physical_pin": "11",
+      "group": "Communication",
+      "var_alias": "uRx",
+      "name": "GPIO20 / UART0_RX",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "UART",
+        "RXD",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 11,
+      "header_id": "Main",
+      "physical_pin": "10",
+      "group": "Communication",
+      "var_alias": "sSck",
+      "name": "GPIO8 / SPI_SCK",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "SPI",
+        "SCK",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 12,
+      "header_id": "Main",
+      "physical_pin": "9",
+      "group": "Communication",
+      "var_alias": "sMiso",
+      "name": "GPIO9 / SPI_MISO / BOOT",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "SPI",
+        "MISO",
+        "INTERRUPT"
+      ]
+    },
+    {
+      "pin": 13,
+      "header_id": "Main",
+      "physical_pin": "8",
+      "group": "Communication",
+      "var_alias": "sMosi",
+      "name": "GPIO10 / SPI_MOSI",
+      "capabilities": [
+        "GPIO",
+        "PWM",
+        "SPI",
+        "MOSI",
+        "INTERRUPT"
+      ]
+    }
+  ]
+}
