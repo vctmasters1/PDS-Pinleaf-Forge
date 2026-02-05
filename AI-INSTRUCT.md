@@ -10,9 +10,9 @@
 
 **Authority Level**: DEEP (Authoritative for hardware platform specifications)
 
-**Technology Stack**: Pure HTML/CSS/JavaScript (standalone, no dependencies, no build tools)
+**Technology Stack**: Pure HTML/CSS/JavaScript (modular, no dependencies, no build tools)
 
-**Current Version**: 2.1 (February 4, 2026)
+**Current Version**: 2.2 (February 4, 2026)
 
 ---
 
@@ -22,34 +22,132 @@
 
 1. **Define platform specifications** - CPU architecture, RAM, flash, GPIO, wireless capabilities
 2. **Map pin capabilities** - Visual matrix with multi-header support (J1, J2, J3...)
-3. **Generate pinout diagrams** - Printable "pinout leaf" overlays for dev boards
-4. **Export structured JSON** - Ready for databases, code generation, PlatformIO, Wokwi
+3. **Variable aliasing** - Programming-friendly pin names (var_alias) for code generation
+4. **Generate pinout diagrams** - Printable "pinout leaf" overlays for dev boards
+5. **Export structured JSON** - Ready for databases, code generation, PlatformIO, Wokwi
 
 **Key Differentiator**: AI-assisted workflow using Copilot/ChatGPT prompts to auto-populate hardware specifications, eliminating manual datasheet hunting.
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture Overview (v2.2)
 
-### **Core Components**
+### **Modular Structure** ✨
 
-1. **Platform Editor** (`platform-editor-v2.html`)
-   - Main tool for creating/editing platform specifications
-   - Multi-step workflow: Research → Import → Edit → Export
-   - Pin capability matrix with drag & drop, sorting, grouping
-   - Color-coded capability buttons (VIN, GND, 3V3, 5V, GPIO, ADC, PWM, UART, SPI, I2C, CAN, etc.)
-   - JSON preview and export
+**Both tools now use modular architecture:**
 
-2. **Pinout Leaf Generator** (`pinout-leaf-generator.html`)
-   - Creates printable pinout overlays for dev boards
-   - Dual-row and single-row layouts
-   - SVG/PDF export for printing at actual size
-   - Color-coded or black & white schemes
+#### **Platform Editor** (`platform-editor-v2.html`)
+- **HTML**: 600 lines - Structure only
+- **CSS**: `css/platform-editor.css` (700 lines)
+- **JavaScript**: 5 modules in `js/` (900 lines total)
 
-3. **Data Storage**
-   - `platforms/<id>.json` - Platform definitions
-   - `hwrev/<id>/hwrev-config.json` - Board revision mappings
-   - Pure JSON, no database required
+#### **Pinout Leaf Generator** (`pinout-leaf-generator-v2.html`) ✨ NEW
+- **HTML**: 180 lines - Structure only
+- **CSS**: `css/pinout-generator.css` (200 lines)
+- **JavaScript**: 5 modules in `js/` (330 lines total)
+
+### **JavaScript Modules**
+
+**Platform Editor Modules:**
+
+| Module | Lines | Responsibility |
+|--------|-------|----------------|
+| `platform-editor-core.js` | 50 | Global state, constants, event listeners |
+| `prompt-generator.js` | 100 | AI prompt generation with var_alias |
+| `json-handler.js` | 150 | Import/Export JSON, pinout generator link |
+| `pin-matrix.js` | 350 | Pin rows, drag-drop, sorting |
+| `data-collector.js` | 250 | Data collection, preview updates |
+
+**Pinout Generator Modules:** ✨ NEW
+
+| Module | Lines | Responsibility |
+|--------|-------|----------------|
+| `pinout-generator-core.js` | 30 | Global state, auto-load from sessionStorage |
+| `pinout-json-handler.js` | 20 | Import JSON, populate form |
+| `pinout-svg-generator.js` | 180 | SVG generation with proper grouping |
+| `pinout-ui-controller.js` | 40 | Preview updates, header buttons |
+| `pinout-download-handler.js` | 60 | Download SVG/PDF with file organization |
+
+**Loading Order** (CRITICAL):
+```html
+<!-- Platform Editor -->
+<script src="js/platform-editor-core.js"></script>      <!-- Load first -->
+<script src="js/prompt-generator.js"></script>
+<script src="js/json-handler.js"></script>
+<script src="js/pin-matrix.js"></script>
+<script src="js/data-collector.js"></script>
+
+<!-- Pinout Generator -->
+<script src="js/pinout-generator-core.js"></script>     <!-- Load first -->
+<script src="js/pinout-json-handler.js"></script>
+<script src="js/pinout-svg-generator.js"></script>
+<script src="js/pinout-ui-controller.js"></script>
+<script src="js/pinout-download-handler.js"></script>
+```
+
+### **Why Modular Architecture?**
+
+✅ **Maintainability** - Each file <400 lines, single responsibility  
+✅ **Debuggable** - Console shows which file has errors  
+✅ **Collaborative** - Multiple developers can work on different modules  
+✅ **Performance** - Browser caches individual modules  
+✅ **GitHub Pages Compatible** - No build process required  
+
+### **Legacy Backups**
+
+- `platform-editor-v2-legacy.html` (2,800 lines) - Monolithic backup
+- `pinout-leaf-generator-legacy.html` (700 lines) - Monolithic backup
+
+---
+
+## 📂 File Structure (v2.2)
+
+```
+PinleafForge/
+├── platform-editor-v2.html           # Main editor (600 lines - HTML only) ✨
+├── platform-editor-v2-legacy.html    # Backup (2800 lines - monolithic)
+├── pinout-leaf-generator.html        # Pinout diagram generator
+├── README.md                          # User documentation
+├── AI-INSTRUCT.md                     # This file (AI agent guide)
+├── LICENSE                            # MIT license
+├── .gitignore                         # Git exclusions
+│
+├── css/                               # ✨ NEW - Stylesheets
+│   └── platform-editor.css           # All styles (700 lines)
+│
+├── js/                                # ✨ NEW - JavaScript modules
+│   ├── platform-editor-core.js       # Core state (50 lines)
+│   ├── prompt-generator.js           # AI prompts (100 lines)
+│   ├── json-handler.js               # Import/Export (150 lines)
+│   ├── pin-matrix.js                 # Pin matrix (350 lines)
+│   └── data-collector.js             # Data collection (250 lines)
+│
+├── platforms/                         # Platform JSON files ✨ UPDATED
+│   ├── esp32c3/
+│   │   ├── esp32c3.json              # Platform specification
+│   │   └── esp32c3_J1_pinout.svg     # Pinout diagram
+│   ├── renesas-ra6m5/
+│   │   ├── renesas-ra6m5.json
+│   │   ├── renesas-ra6m5_J1_pinout.svg
+│   │   └── renesas-ra6m5_J2_pinout.svg
+│   └── stm32f407/
+│       ├── stm32f407.json
+│       └── stm32f407_J1_pinout.svg
+│
+├── hwrev/                             # Board revision configs
+│   └── h2o_001/
+│       └── hwrev-config.json
+│
+└── .local_mds/                        # Internal dev docs
+    ├── MODULAR-STRUCTURE.md           # Migration guide
+    ├── VAR-ALIAS-FEATURE.md           # var_alias docs
+    ├── PLATFORM-FILE-ORGANIZATION.md  # ✨ NEW - File organization guide
+    ├── HEADER-ID-FEATURE.md
+    ├── GITHUB-PAGES-SETUP.md
+    └── ...
+```
+
+**Note**: Platform files are now organized in subdirectories by platform name/ID. See [PLATFORM-FILE-ORGANIZATION.md](./.local_mds/PLATFORM-FILE-ORGANIZATION.md) for details.
 
 ---
 
@@ -87,6 +185,7 @@
       "header_id": "J1",
       "physical_pin": "1",
       "group": "Power",
+      "var_alias": "vin_power",
       "name": "VIN",
       "capabilities": ["VIN"]
     },
@@ -95,103 +194,39 @@
       "header_id": "J1",
       "physical_pin": "3",
       "group": "Communication",
-      "name": "GPIO2 / ADC1_CH2",
+      "var_alias": "i2c_sda",
+      "name": "GPIO2 / ADC1_CH2 / SDA",
       "capabilities": ["GPIO", "ADC", "I2C", "SDA"]
     }
   ]
 }
 ```
 
-**Key Fields**:
+**Key Fields (v2.2)**:
 - `id`: Lowercase identifier (e.g., `esp32c3`, `stm32f407`)
 - `pin_capabilities`: Array of pin definitions with:
   - `pin`: Logical GPIO number (0-based index)
-  - `header_id`: **NEW in v2.0** - Connector ID (J1, J2, Main, etc.)
+  - `header_id`: Connector ID (J1, J2, Main, etc.) - **Added v2.0**
   - `physical_pin`: Physical pin number on board (1, PA0, D2, etc.)
   - `group`: Functional group (Power, GPIO, Communication, Analog, Special)
+  - `var_alias`: Programming variable name - **Added v2.2** ✨ NEW
   - `name`: Descriptive name (e.g., "GPIO0 / BOOT", "VIN")
-  - `capabilities`: Array of electrical functions (VIN, GND, 3V3, 5V, GPIO, ADC, PWM, UART, RXD, TXD, SPI, MISO, MOSI, SCK, I2C, SDA, SCL, CAN, RMT, INTERRUPT, RESET)
+  - `capabilities`: Array of electrical functions
 
-### **hwrev** (Hardware Revision / Board Specification)
-**What it defines**: Physical board layout and pin mappings
+**var_alias Field** ✨ NEW in v2.2:
+- Programming-friendly variable name for code generation
+- Future use: Will become C/C++ `#define` symbols
+- Naming conventions:
+  - Prefix-based: `gPin1` (GPIO), `aPin1` (ADC), `pPin1` (PWM)
+  - Descriptive: `led_status`, `btn_start`, `sensor_temp`
+  - Existing code compatibility: Use existing symbol names
 
-**File**: `hwrev/<id>/hwrev-config.json`
-
-**Structure**:
-```json
-{
-  "id": "h2o_001",
-  "name": "H2O-DEV-12102025",
-  "platform": "esp32c3",
-  "description": "H2O-Tower aeroponics control board",
-  "schematic": "h2o_001_schematic_rev1.pdf",
-  "pinout": {
-    "water_level_sensor": {
-      "gpio": 2,
-      "function": "ADC",
-      "label": "Water Level"
-    },
-    "mist_pump_relay": {
-      "gpio": 5,
-      "function": "GPIO_OUT",
-      "label": "Mist Pump"
-    }
-  },
-  "connectors": {
-    "J1": "Main power input (5V)",
-    "J2": "Sensor connector (I2C)",
-    "J3": "Pump outputs (relays)"
-  }
-}
-```
-
-### **Role** (Automation Behavior)
-**What it defines**: Device behavior and automation logic
-
-**Files**: NOT in Pinleaf Forge - defined in LadderLogicEditor as `.st` IEC 61131-3 files
-
-**Key Point**: Same board can run different roles (aeroponics, greenhouse, propagation) with different automation files.
-
----
-
-## 🎨 UI/UX Design Principles
-
-### **Layout Standards**
-
-**Pin Matrix Column Widths** (v2.1):
-- Header: `70px` (fixed) - Connector ID (J1, J2, etc.)
-- Physical: `70px` (fixed) - Physical pin number
-- Group: `120px` (fixed) - Functional group
-- Pin Name: `140px` (fixed) - Descriptive name
-- Capabilities: `flex` (remaining space) - Button array with horizontal scroll
-
-**Why Fixed Widths?**
-- Consistent alignment across all rows
-- No text wrapping or layout shifts
-- Professional datasheet-like appearance
-- Text overflow handled with ellipsis
-- Easy visual scanning
-
-### **Color Coding** (Capability Buttons)
-
-| Capability | Color | CSS Class |
-|------------|-------|-----------|
-| **VIN** | Bright Red (#ff0000) | `.capability-btn.VIN.active` |
-| **5V** | Red Gradient | `.capability-btn.\35 V.active` |
-| **3V3** | Dark Red Gradient (#8B0000) | `.capability-btn.\33 V3.active` |
-| **GND** | Black (#000000) | `.capability-btn.GND.active` |
-| **GPIO** | Purple (#9370DB) | `.capability-btn.GPIO.active` |
-| **ADC** | Orange (#FFA500) | `.capability-btn.ADC.active` |
-| **PWM** | Turquoise (#4ecdc4) | `.capability-btn.PWM.active` |
-| **UART/RXD/TXD** | Green (#00ff00) | `.capability-btn.UART.active` |
-| **SPI/MISO/MOSI/SCK** | Blue (#0000FF) | `.capability-btn.SPI.active` |
-| **I2C/SDA/SCL** | Slate Gray (#708090) | `.capability-btn.I2C.active` |
-| **CAN** | Light Blue (#92afde) | `.capability-btn.CAN.active` |
-| **RESET** | Dark Turquoise (#00CED1) | `.capability-btn.RESET.active` |
-| **INTERRUPT** | Yellow (#FFFF00) | `.capability-btn.INTERRUPT.active` |
-| **NEW_CAP** | New Color (#XXXXXX) | `.capability-btn.NEW_CAP.active` |
-
-**Note**: CSS class names for numeric values require escaping (e.g., `.\35 V` for "5V", `.\33 V3` for "3V3").
+**Capabilities** (Pin-Level Functions):
+- **Power**: VIN, GND, 3V3, 5V
+- **Digital I/O**: GPIO, DIO, INTERRUPT
+- **Analog**: ADC, PWM
+- **Communication**: UART, RXD, TXD, SPI, MISO, MOSI, SCK, I2C, SDA, SCL, CAN
+- **Special**: RESET, RMT
 
 ---
 
@@ -203,23 +238,23 @@
    - User enters platform name (e.g., "ESP32-C3")
    - Click "📋 Generate & Copy Prompt"
    - Paste prompt in Copilot Chat / ChatGPT
-   - Copilot returns complete JSON specification
+   - Copilot returns complete JSON specification (includes var_alias)
 
 2. **Import Phase**
    - Paste JSON in "📥 Import Copilot's JSON Response"
    - Click "📥 Import JSON & Fill Form"
-   - All fields auto-populated (platform specs, pin matrix)
+   - All fields auto-populated (platform specs, pin matrix, var_alias)
 
 3. **Edit Phase**
    - Review auto-filled data
-   - Adjust pin names, groups, headers as needed
+   - Adjust pin names, groups, headers, **var_alias** as needed
    - Toggle capability buttons (color-coded)
    - Drag & drop to reorder pins
-   - Sort by Header, Physical, Group, or Name
+   - Sort by Header, Physical, Group, Var Alias, or Name
 
 4. **Export Phase**
    - Click "⬇️ Download as JSON"
-   - Save to `platforms/<id>.json`
+   - Save to `platforms/<id>.json` (timestamped filename)
    - Optionally: "📄 Generate Pinout Leaf" for diagrams
 
 ### **Multi-Header Support** (v2.0+)
@@ -228,13 +263,13 @@
 
 **Example**: Raspberry Pi
 - J1: 40-pin GPIO header
-- J2: Camera connector
-- J3: Display connector
+- J2: Camera connector (CSI)
+- J3: Display connector (DSI)
 - J4: Power input
 
 **Workflow**:
 1. Edit "Header" column for each pin (e.g., J1, J2, J3)
-2. Sort by Header + Physical Pin (`1,2` in multi-column sort)
+2. Sort by Header + Physical Pin (`1,4` in multi-column sort)
 3. Pinout Leaf Generator creates separate diagrams per header
 
 ---
@@ -244,89 +279,132 @@
 ### **When Editing Code**
 
 **DO**:
-- ✅ Maintain fixed column widths (70px, 70px, 120px, 140px)
-- ✅ Keep CSS escaped numeric classes (`.\35 V`, `.\33 V3`)
-- ✅ Test with 20+ pin rows to verify scrolling
-- ✅ Ensure full-width layout for inputs/textareas
+- ✅ Maintain modular structure (HTML/CSS/JS separation)
+- ✅ Keep fixed column widths (70px header, 120px group, 120px var_alias, 70px physical, 140px name)
+- ✅ Test all JavaScript modules load in correct order
+- ✅ Check browser console for errors (F12)
 - ✅ Preserve color-coded capability buttons
 - ✅ Maintain drag & drop functionality
-- ✅ Keep JSON preview full-width (max-height: 400px)
+- ✅ Test with 20+ pin rows to verify scrolling
+- ✅ Update version number in AI-INSTRUCT.md when making changes
 
 **DON'T**:
+- ❌ Add inline styles or scripts (use external files)
+- ❌ Change script loading order (breaks dependencies)
 - ❌ Shrink input field widths (must stay 100%)
-- ❌ Change pin matrix column widths without updating header row
-- ❌ Add dependencies (npm, libraries, frameworks)
-- ❌ Add backend requirements (keep pure client-side)
+- ❌ Add npm packages or build tools (keep standalone)
 - ❌ Break JSON import/export compatibility
-- ❌ Change color scheme without updating docs
+- ❌ Remove legacy backup file (platform-editor-v2-legacy.html)
 
 ### **CSS Architecture**
 
-**Critical Styles**:
-```css
-/* Pin Matrix Column Widths - DO NOT CHANGE without coordinating */
-.pin-header { width: 70px; min-width: 70px; max-width: 70px; }
-.pin-physical { width: 70px; min-width: 70px; max-width: 70px; }
-.pin-group { width: 120px; min-width: 120px; max-width: 120px; }
-.pin-label { width: 140px; min-width: 140px; max-width: 140px; }
+**File**: `css/platform-editor.css`
 
-/* Capability Buttons - Color Coding */
-.capability-btn.\35 V.active { /* 5V - escaped */ }
-.capability-btn.\33 V3.active { /* 3V3 - escaped */ }
+**Organized Sections**:
+```css
+/* BASE STYLES */
+/* LAYOUT CONTAINERS */
+/* FORM SECTIONS */
+/* FORM INPUTS */
+/* GRID LAYOUT */
+/* BUTTONS */
+/* JSON PREVIEW */
+/* NOTIFICATIONS */
+/* PIN MATRIX - LAYOUT */
+/* PIN MATRIX - DRAG HANDLE */
+/* PIN MATRIX - DELETE BUTTON */
+/* PIN MATRIX - EDITABLE FIELDS */
+/* PIN MATRIX - SORTABLE HEADERS */
+/* CAPABILITY BUTTONS - CONTAINER */
+/* CAPABILITY BUTTONS - BASE STYLES */
+/* CAPABILITY BUTTONS - POWER PINS */
+/* CAPABILITY BUTTONS - SPECIAL PINS */
+/* CAPABILITY BUTTONS - GPIO */
+/* CAPABILITY BUTTONS - ANALOG */
+/* CAPABILITY BUTTONS - UART */
+/* CAPABILITY BUTTONS - SPI */
+/* CAPABILITY BUTTONS - I2C */
+/* CAPABILITY BUTTONS - CAN */
+/* SYSTEM FEATURE TOGGLE BUTTONS */
 ```
 
-### **JavaScript State Management**
+**Critical Column Widths** (DO NOT CHANGE without updating all references):
+```css
+.pin-header { width: 70px; min-width: 70px; max-width: 70px; }
+.pin-group { width: 120px; min-width: 120px; max-width: 120px; }
+.pin-var-alias { width: 120px; min-width: 120px; max-width: 120px; }
+.pin-physical { width: 70px; min-width: 70px; max-width: 70px; }
+.pin-label { width: 140px; min-width: 140px; max-width: 140px; }
+```
 
-**Global State**:
-- `platformData` - Current platform JSON
-- `currentSortColumn` - Active sort column
-- `currentSortDirection` - Sort direction (asc/desc)
-- `draggedElement` - Currently dragged pin row
+### **JavaScript Module Architecture**
 
-**Key Functions**:
-- `generatePinRows()` - Creates pin matrix rows
-- `createPinRow(pinNum)` - Creates single pin row
-- `populatePinCapabilities()` - Extracts pin data from UI
-- `updatePreview()` - Updates JSON preview
+#### **1. platform-editor-core.js** (50 lines)
+**Purpose**: Global state and initialization
+
+**Exports**:
+- `form` - Reference to main form element
+- `pin_capabilities` - Array of pin data
+- `ALL_CAPABILITIES` - Available pin functions
+- `PIN_GROUPS` - Available functional groups
+- `currentSortColumn`, `currentSortDirection` - Sort state
+
+**Event Listeners**:
+- `form.addEventListener('input', updatePreview)`
+- `form.addEventListener('change', updatePreview)`
+
+#### **2. prompt-generator.js** (100 lines)
+**Purpose**: AI-assisted prompt generation
+
+**Functions**:
+- `generateResearchPrompt()` - Creates prompt with var_alias field
+- Clipboard API integration
+- Prompt template with complete JSON structure
+
+**Dependencies**: None (standalone)
+
+#### **3. json-handler.js** (150 lines)
+**Purpose**: Import and export JSON data
+
+**Functions**:
+- `parseAndFillForm()` - Import JSON, populate form and pin matrix
+- `downloadJSON()` - Export with timestamped filename
+- `openPinoutLeafGenerator()` - Pass data via sessionStorage
+
+**Dependencies**: 
+- `populatePinCapabilities()` from data-collector.js
+- `generatePinRows()` from pin-matrix.js
+
+#### **4. pin-matrix.js** (350 lines)
+**Purpose**: Pin matrix management
+
+**Functions**:
+- `generatePinRows()` - Create pin matrix
+- `createPinRow(pinNum)` - Create individual pin row
+- `addPinRow()` - Add new pin row
 - `sortPins(column)` - Single-column sort
 - `multiColumnSort(columns)` - Multi-column sort
-- `generateResearchPrompt()` - Creates Copilot prompt
-- `parseAndFillForm()` - Imports JSON
+- `showSortOptions()` - Sort UI dialog
+- Drag-and-drop handlers
 
----
+**Dependencies**: 
+- `updatePreview()` from data-collector.js
+- `ALL_CAPABILITIES` from platform-editor-core.js
 
-## 📂 File Structure
+#### **5. data-collector.js** (250 lines)
+**Purpose**: Data collection and preview
 
-```
-PinleafForge/ (or PDS-HwPlatform/)
-├── platform-editor-v2.html      # ⚡ Main editor (Pinleaf Forge)
-├── pinout-leaf-generator.html   # Pinout diagram generator
-├── .gitignore                   # Git exclusions
-├── LICENSE                      # MIT license
-│
-├── README.md                    # User documentation
-├── AI-INSTRUCT.md              # This file (AI agent guide)
-│
-├── platforms/                  # Platform JSON files
-│   ├── esp32c3.json
-│   ├── renesas-ra6m5.json
-│   └── stm32f407.json
-│
-├── hwrev/                      # Board revision configs
-│   └── h2o_001/
-│       └── hwrev-config.json
-│
-├── .local_mds/                 # Internal dev docs (excluded from Git)
-│   ├── GIT-SETUP.md
-│   ├── HEADER-ID-FEATURE.md
-│   ├── REBRANDING-SUMMARY.md
-│   └── FINAL-COMMIT.md
-│
-└── .old/                       # Deprecated files (excluded by .gitignore)
-    ├── ai-backend.py
-    ├── platform-editor-v2 - Copy.html
-    └── ENHANCEMENT-PLAN.md
-```
+**Functions**:
+- `toggleSystemFeature(button)` - Toggle system feature buttons
+- `getSystemFeatures()` - Collect system features
+- `getCommunicationInterfaces()` - Collect communication interfaces
+- `getUsbPorts()` - Collect USB port counts
+- `populatePinCapabilities()` - Extract pin data from UI
+- `updatePreview()` - Update JSON preview
+- `updateQuickPinoutPreview(data)` - Update SVG preview
+- `generateQuickPinoutSVG(data)` - Generate SVG diagram
+
+**Dependencies**: None (leaf module)
 
 ---
 
@@ -334,12 +412,13 @@ PinleafForge/ (or PDS-HwPlatform/)
 
 ### **Task: Add New Capability Button**
 
-1. **Update ALL_CAPABILITIES array**:
+**Steps**:
+1. Edit `js/platform-editor-core.js`:
    ```javascript
-   const ALL_CAPABILITIES = ['VIN', 'GND', '3V3', '5V', 'RESET', 'GPIO', 'ADC', 'PWM', 'UART', 'RXD', 'TXD', 'SPI', 'MISO', 'MOSI', 'SCK', 'I2C', 'SDA', 'SCL', 'CAN', 'RMT', 'INTERRUPT', 'NEW_CAP'];
+   const ALL_CAPABILITIES = [..., 'NEW_CAP'];
    ```
 
-2. **Add CSS color style**:
+2. Edit `css/platform-editor.css`:
    ```css
    .capability-btn.NEW_CAP.active {
        background: #color;
@@ -348,105 +427,44 @@ PinleafForge/ (or PDS-HwPlatform/)
    }
    ```
 
-3. **Update research prompt** (if needed)
+3. Edit `js/prompt-generator.js` (if needed):
+   - Add to capability list in prompt template
+
+4. Test: Generate pin rows, toggle new button, verify color
 
 ### **Task: Fix Layout Issue**
 
-1. **Check column widths** in CSS (70px, 70px, 120px, 140px)
-2. **Verify header row matches** column widths
-3. **Test with 20+ pins** to ensure alignment
-4. **Check full-width** for inputs/textareas (`width: 100%`)
+**Steps**:
+1. Check `css/platform-editor.css` for column widths
+2. Verify HTML header row matches CSS widths
+3. Test with 20+ pins to ensure alignment
+4. Check browser console (F12) for errors
+5. Clear browser cache and reload
 
-### **Task: Update Branding**
+### **Task: Add New JavaScript Function**
 
-1. **Update title tags** (`<title>Pinleaf Forge...</title>`)
-2. **Update header section** (`<h1>⚡ Pinleaf Forge</h1>`)
-3. **Update README.md** with new branding
-4. **Update meta tags** (if added)
+**Decision Tree**:
+- **UI State/Global** → `platform-editor-core.js`
+- **AI Prompts** → `prompt-generator.js`
+- **Import/Export** → `json-handler.js`
+- **Pin Matrix** → `pin-matrix.js`
+- **Data Collection** → `data-collector.js`
 
-### **Task: Add New Sort Column**
+**Steps**:
+1. Choose appropriate module
+2. Add function with JSDoc comment
+3. Update dependencies if needed
+4. Test in browser (F12 console)
+5. Update MODULAR-STRUCTURE.md if significant
 
-1. **Add sort header** in HTML with `onclick="sortPins('newcol')"`
-2. **Update sortPins()** function to handle new column
-3. **Update multiColumnSort()** function
-4. **Update showSortOptions()** prompt text
+### **Task: Update Styling**
 
----
-
-## 🐛 Known Issues & Limitations
-
-### **Current Limitations**
-
-1. **No Backend** - All data stored as JSON files (by design)
-2. **No Database** - Cannot query across platforms (by design)
-3. **Manual File Management** - User must save JSON files manually
-4. **Browser Storage** - sessionStorage used temporarily for pinout generator
-5. **PDF Export** - Not implemented (SVG → Print to PDF workaround)
-
-### **Not Bugs** (Intentional Design)
-
-- ❌ No server save button functionality (use "Download as JSON")
-- ❌ No platform library/catalog (static files only)
-- ❌ No user authentication (pure client-side tool)
-- ❌ No cloud sync (local files only)
-
----
-
-## 🔗 Integration Points
-
-### **Related Tools/Components**
-
-| Tool | Purpose | Integration |
-|------|---------|-------------|
-| **LadderLogicEditor** | Automation logic editor | Reads platform JSON for pin names |
-| **PDS-BuildTools** | Firmware build system | Reads platform JSON for toolchain selection |
-| **Device Firmware** | Embedded firmware | Reads hwrev JSON for pin assignments |
-| **Wokwi Simulator** | Online simulator | Can import platform JSON |
-| **PlatformIO** | Build system | Can use platform JSON for custom boards |
-
-### **Data Flow**
-
-```
-Copilot Chat → Pinleaf Forge → platforms/*.json
-                     ↓
-              hwrev/*.json → LadderLogicEditor
-                     ↓
-              Device Firmware
-```
-
----
-
-## 📝 Version History
-
-| Version | Date | Key Changes |
-|---------|------|-------------|
-| **2.1** | Feb 4, 2026 | Rebranded to Pinleaf Forge, fixed layouts, comprehensive synopsis |
-| **2.0** | Feb 4, 2026 | Multi-header support (header_id), removed backend, pure client-side |
-| **1.0** | Feb 2, 2026 | Initial release with backend API, basic pin matrix |
-
----
-
-## 🎓 Learning Resources
-
-### **For New AI Agents**
-
-**Start Here**:
-1. Read this file (AI-INSTRUCT.md)
-2. Read README.md for user perspective
-3. Open `platform-editor-v2.html` and trace workflow
-4. Try creating a platform (ESP32-C3 or STM32F407)
-
-**Key Concepts**:
-- Platform ≠ Board (CPU specs vs physical layout)
-- Multi-header support (J1, J2, J3...)
-- Color-coded capabilities (visual hierarchy)
-- AI-assisted workflow (prompt → JSON → import)
-
-**Common Pitfalls**:
-- Shrinking layout widths accidentally
-- Breaking CSS numeric escapes (`.\35 V`, `.\33 V3`)
-- Adding dependencies (keep standalone)
-- Mixing platform and hwrev concepts
+**Steps**:
+1. Edit `css/platform-editor.css`
+2. Find appropriate section (use comments)
+3. Add/modify styles
+4. Test in browser with hard refresh (Ctrl+F5)
+5. Verify no layout shifts
 
 ---
 
@@ -454,18 +472,16 @@ Copilot Chat → Pinleaf Forge → platforms/*.json
 
 Before committing changes:
 
-- [ ] All input fields are full-width (`width: 100%`)
-- [ ] JSON preview is full-width (`width: 100%`, `max-height: 400px`)
-- [ ] Pin matrix columns have fixed widths (70, 70, 120, 140)
-- [ ] Header row matches column widths
-- [ ] Capability buttons have correct colors
-- [ ] CSS numeric escapes are correct (`.\35 V`, `.\33 V3`)
-- [ ] Drag & drop works
-- [ ] Sorting works (single and multi-column)
-- [ ] JSON import/export works
-- [ ] No console errors
-- [ ] Tested with 20+ pins
-- [ ] Documentation updated (README.md, AI-INSTRUCT.md if needed)
+- [ ] **Modular Structure**: No inline styles or scripts in HTML
+- [ ] **Script Loading**: Correct order in HTML (core → prompt → json → pin-matrix → data-collector)
+- [ ] **CSS Organization**: Changes in appropriate section with comments
+- [ ] **Column Widths**: Fixed widths maintained (70, 120, 120, 70, 140)
+- [ ] **Browser Console**: No errors (F12)
+- [ ] **Functionality**: All features work (prompt, import, export, sort, drag-drop)
+- [ ] **Testing**: Tested with 20+ pins
+- [ ] **Documentation**: README.md and AI-INSTRUCT.md updated if needed
+- [ ] **Backup**: Legacy file (platform-editor-v2-legacy.html) preserved
+- [ ] **Version**: Version number updated in AI-INSTRUCT.md
 
 ---
 
@@ -476,23 +492,57 @@ Before committing changes:
 **GitHub Pages**: https://vctmasters1.github.io/PDS-Pinleaf-Forge/platform-editor-v2.html
 
 **Deployment Steps**:
-1. Push changes to `main` branch
-2. GitHub Pages auto-deploys from `main` branch root
-3. No build step required (pure HTML/CSS/JS)
+1. Test locally in browser
+2. Commit changes to Git
+3. Push to `main` branch
+4. GitHub Pages auto-deploys (1-2 minutes)
+5. Test live URL with cache cleared
 
-**Testing Deployment**:
-- Wait 1-2 minutes after push
-- Clear browser cache
-- Test live URL
-- Check browser console for errors
+**File Serving**:
+- HTML: `platform-editor-v2.html`
+- CSS: `css/platform-editor.css`
+- JS: `js/*.js` (all modules)
+- All served as static files (no build process)
 
 ---
 
-**Last Updated**: February 4, 2026  
-**Current Version**: 2.1  
-**Status**: Production-ready, actively maintained  
-**Authority**: AUTHORITATIVE for Pinleaf Forge project  
-**Maintainer**: PDS Development Team
+## 📝 Version History
+
+| Version | Date | Key Changes |
+|---------|------|-------------|
+| **2.2** | Feb 4, 2026 | Modular architecture (CSS/JS separated), var_alias field |
+| **2.1** | Feb 4, 2026 | Rebranded to Pinleaf Forge, fixed layouts |
+| **2.0** | Feb 4, 2026 | Multi-header support (header_id), removed backend |
+| **1.0** | Feb 2, 2026 | Initial release |
+
+---
+
+## 🎓 Learning Resources
+
+### **For New AI Agents**
+
+**Start Here**:
+1. Read this file (AI-INSTRUCT.md) - AUTHORITATIVE
+2. Read README.md for user perspective
+3. Read `.local_mds/MODULAR-STRUCTURE.md` for migration guide
+4. Read `.local_mds/VAR-ALIAS-FEATURE.md` for var_alias feature
+5. Open `platform-editor-v2.html` and trace workflow
+6. Check `js/` modules to understand code organization
+
+**Key Concepts**:
+- **Modular Architecture**: HTML/CSS/JS separation
+- **Platform ≠ Board**: CPU specs vs physical layout
+- **Multi-header Support**: J1, J2, J3... connectors
+- **var_alias**: Programming-friendly pin names
+- **Color-coded Capabilities**: Visual hierarchy
+- **AI-assisted Workflow**: Prompt → JSON → Import
+
+**Common Pitfalls**:
+- Loading scripts in wrong order (breaks dependencies)
+- Adding inline styles/scripts (breaks modularity)
+- Changing column widths without updating all references
+- Breaking CSS numeric escapes (`.\35 V`, `.\33 V3`)
+- Adding build tools or npm packages
 
 ---
 
@@ -503,3 +553,11 @@ Before committing changes:
 **License**: MIT (see LICENSE file)
 
 **Contributing**: Pull requests welcome! Follow coding guidelines above.
+
+---
+
+**Last Updated**: February 4, 2026  
+**Current Version**: 2.2  
+**Status**: Production-ready, modular architecture  
+**Authority**: AUTHORITATIVE for Pinleaf Forge project  
+**Maintainer**: PDS Development Team

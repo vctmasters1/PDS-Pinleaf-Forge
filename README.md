@@ -253,6 +253,80 @@ Create `platforms/<id>.json` manually:
 
 ---
 
+## 🔤 Variable Alias (`var_alias`)
+
+### **What is it?**
+The `var_alias` field provides **programming-friendly variable names** for each pin, making it easier to generate code and maintain consistency across firmware.
+
+### **Future Use:**
+⚠️ **Important:** The `var_alias` will eventually become **C/C++ #define symbols** in auto-generated header files.
+
+**Example:**
+```c
+// Auto-generated from platform JSON
+#define led_status    GPIO2
+#define btn_start     GPIO5
+#define sensor_temp   GPIO4
+
+digitalWrite(led_status, HIGH);  // Instead of digitalWrite(2, HIGH)
+```
+
+### **Naming Convention Recommendations**
+
+To make your aliases instantly recognizable and compatible with existing code, consider using **prefixes** based on pin function:
+
+| Prefix | Function | Examples |
+|--------|----------|----------|
+| **g** | GPIO (General Digital I/O) | `gPin1`, `gLed`, `gRelay` |
+| **a** | ADC (Analog Input) | `aPin1`, `aSensor`, `aVoltage` |
+| **p** | PWM (Pulse Width Modulation) | `pPin1`, `pMotor`, `pLed` |
+| **u** | UART (Serial Communication) | `uRx`, `uTx`, `uDebug` |
+| **i** | I2C | `iSda`, `iScl` |
+| **s** | SPI | `sMiso`, `sMosi`, `sSck` |
+
+**Example Platform:**
+```json
+{
+  "pin_capabilities": [
+    {
+      "pin": 2,
+      "var_alias": "gLedStatus",
+      "name": "GPIO2 / Status LED",
+      "capabilities": ["GPIO", "PWM"]
+    },
+    {
+      "pin": 4,
+      "var_alias": "aTempSensor",
+      "name": "GPIO4 / ADC1_CH0 / Temp",
+      "capabilities": ["GPIO", "ADC"]
+    }
+  ]
+}
+```
+
+### **Adapting Existing Code**
+
+If you have **existing firmware**, use your current pin names as `var_alias`:
+
+```c
+// Your existing code
+#define LED_PIN 2
+```
+
+```json
+// In Pinleaf Forge
+{"var_alias": "LED_PIN", "pin": 2}
+```
+
+**Result:** No code changes needed when auto-generating headers!
+
+### **Best Practices**
+
+✅ **DO:** Use descriptive names (`led_status`, `btn_start`), follow consistent convention  
+❌ **DON'T:** Use generic names (`pin1`, `output1`), reserved keywords, special characters
+
+---
+
 ## 📦 Related Components
 
 | Component | Purpose | Uses PDS-HwPlatform |

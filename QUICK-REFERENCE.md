@@ -29,7 +29,7 @@ Click: 📥 Save Platform
 ### Step 5: Use in Project
 ```
 Move file to: PDS-HwSpecs/platforms/arduino-nano.json
-Now available in: PDS-HwRevEditor, build system
+Now available in: PDS-HwPlatform/platform-editor-v2.html, build system
 ```
 
 ---
