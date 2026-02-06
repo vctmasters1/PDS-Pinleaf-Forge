@@ -50,6 +50,70 @@
                         <label for="platformSearchInput">Platform Name</label>
                         <input type="text" id="platformSearchInput" placeholder="e.g., ESP32-C3, STM32F103, Renesas R7FA6M5BH2CBG">
                     </div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label style="font-weight: bold; margin-bottom: 10px;">Common Peripherals/Sensors (Optional)</label>
+                        <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">Select any common boards/sensors you plan to use. This helps generate pin recommendations.</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 600px;">
+                            <!-- Sensor/ADC Modules -->
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">HX711 (Load Cell)</label>
+                                <input type="number" id="hx711Count" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">PH-ADC Sensor</label>
+                                <input type="number" id="phAdcCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">EC/TDS Sensor</label>
+                                <input type="number" id="ecTdsCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            
+                            <!-- Stepper Motor Drivers -->
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">TMC2209 Driver</label>
+                                <input type="number" id="tmc2209Count" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">TMC2130 Driver</label>
+                                <input type="number" id="tmc2130Count" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">DRV8825 Driver</label>
+                                <input type="number" id="drv8825Count" min="0" value="0" style="width: 60px;">
+                            </div>
+                            
+                            <!-- Generic Sensors -->
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">5V Sensors</label>
+                                <input type="number" id="sensor5vCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">3.3V Sensors</label>
+                                <input type="number" id="sensor3v3Count" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">Analog Sensors</label>
+                                <input type="number" id="analogSensorCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            
+                            <!-- Switching -->
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">Relays</label>
+                                <input type="number" id="relayCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">MOSFET Switches</label>
+                                <input type="number" id="mosfetCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.9em; color: #555;">Servo Motors</label>
+                                <input type="number" id="servoCount" min="0" value="0" style="width: 60px;">
+                            </div>
+                        </div>
+                    </div>
+                    
                     <button type="button" class="primary" onclick="generateResearchPrompt()">📋 Generate & Copy Prompt</button>
                     
                     <div id="generatedPromptArea" style="display: none; margin-top: 15px;">
@@ -284,6 +348,7 @@
                     
                     <div style="margin-top: 15px;">
                         <button type="button" class="primary" onclick="addPinRow()">➕ Add Pin Row</button>
+                        <button type="button" class="primary" style="margin-left: 10px; background: #667eea;" onclick="updatePreview()">🔄 Refresh JSON Preview</button>
                     </div>
                 </div>
 

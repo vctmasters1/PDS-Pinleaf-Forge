@@ -109,6 +109,9 @@ function parseAndFillForm() {
 }
 
 function downloadJSON() {
+    // Refresh preview first to ensure latest data
+    updatePreview();
+    
     const data = {
         id: document.getElementById('platformId').value,
         name: document.getElementById('platformName').value,
